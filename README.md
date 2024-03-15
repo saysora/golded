@@ -12,7 +12,7 @@ This library is currently in development. Using it is not recommended until this
 ```go
 package main
 
-import gold "github.com/saysoya/gold"
+import gold "github.com/saysora/gold"
 
 func main() {
     // client is used for handling the websocket client, api is used to communicate to the guilded rest api
