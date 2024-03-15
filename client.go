@@ -1,4 +1,4 @@
-package gold
+package golded
 
 // TODO:
 // + Implement Heartbeat

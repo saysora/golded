@@ -1,4 +1,4 @@
-package gold
+package golded
 
 import (
 	"encoding/json"

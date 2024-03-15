@@ -1,4 +1,4 @@
-module github.com/saysora/gold
+module github.com/saysora/golded
 
 go 1.22.0
 

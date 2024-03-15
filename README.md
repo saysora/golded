@@ -1,4 +1,4 @@
-# gold
+# golded
 
 A simple and lightweight go library for working with the Guilded API
 
@@ -12,7 +12,7 @@ This library is currently in development. Using it is not recommended until this
 ```go
 package main
 
-import gold "github.com/saysora/gold"
+import gold "github.com/saysora/golded"
 
 func main() {
     // client is used for handling the websocket client, api is used to communicate to the guilded rest api
