@@ -34,13 +34,10 @@ type PostAnnouncement struct {
 	Content string `json:"content"`
 }
 
-// TODO: Think over structure for get requests
-
 type GetAnnouncementsRes struct {
 	Announcements []Announcement `json:"announcements"`
 }
 
-// NOTE: Reused for responses for Post / Patch
 type GetAnnouncementRes struct {
 	Announcement Announcement `json:"announcement"`
 }
@@ -107,6 +104,10 @@ type CalendarEventCancellation struct {
 	CreatedBy   string  `json:"createdBy"`
 }
 
+type PatchCalendarEventCancellation struct {
+	Description *string `json:"description"`
+}
+
 type CalendarEventRsvp struct {
 	CalendarEventId uint    `json:"calendarEventId"`
 	ChannelId       string  `json:"channelId"`
@@ -116,6 +117,102 @@ type CalendarEventRsvp struct {
 	CreatedBy       string  `json:"createdBy"`
 	UpdatedBy       *string `json:"updatedBy,omitempty"`
 	UpdatedAt       *string `json:"updatedAt,omitempty"`
+}
+
+type CalendarEventRepeatInfoEvery struct {
+	Count    int    `json:"count"`
+	Interval string `json:"interval"`
+}
+
+type CalendarEventRepeatInfo struct {
+	Type               string                        `json:"type"`
+	Every              *CalendarEventRepeatInfoEvery `json:"every,omitempty"`
+	EndAfterOccurences *int                          `json:"endAfterOccurences,omitempty"`
+	EndDate            *string                       `json:"endDate,omitempty"`
+	On                 *[]string                     `json:"on,omitempty"`
+}
+
+type PatchCalendarEvent struct {
+	Name             string                          `json:"name"`
+	Description      *string                         `json:"description,omitempty"`
+	Location         *string                         `json:"location,omitempty"`
+	StartsAt         *string                         `json:"startsAt,omitempty"`
+	Url              *string                         `json:"url,omitempty"`
+	Color            *uint                           `json:"color,omitempty"`
+	IsAllday         *bool                           `json:"isAllDay,omitempty"`
+	RsvpDisabled     *bool                           `json:"rsvpDisabled,omitempty"`
+	RsvpLimit        *int                            `json:"rsvpLimit,omitempty"`
+	AutofillWaitlist *bool                           `json:"autofillWaitlist,omitempty"`
+	Duration         *uint                           `json:"duration,omitempty"`
+	IsPrivate        *bool                           `json:"isPrivate,omitempty"`
+	RoleIds          *[]int                          `json:"roleIds,omitempty"`
+	Cancellation     *PatchCalendarEventCancellation `json:"cancellation,omitempty"`
+}
+
+type GetCalendarEventRes struct {
+	CalendarEvent CalendarEvent `json:"calendarEvent"`
+}
+
+type GetCalendarEventsRes struct {
+	CalendarEvents []CalendarEvent `json:"calendarEvents"`
+}
+
+type GetCalendarEventRsvpRes struct {
+	CalendarEventRsvp CalendarEventRsvp `json:"calendarEventRsvp"`
+}
+
+type GetCalendareventRsvpsRes struct {
+	CalendarEventRsvps []CalendarEventRsvp `json:"calendarEventRsvps"`
+}
+
+// Calendar Event Comments
+type CalendarEventComment struct {
+	Id              uint      `json:"id"`
+	Content         string    `json:"content"`
+	CreatedAt       string    `json:"createdAt"`
+	UpdatedAt       string    `json:"updatedAt"`
+	CalendarEventId uint      `json:"calendarEventId"`
+	ChannelId       string    `json:"channelId"`
+	Mentions        *Mentions `json:"mentions,omitempty"`
+}
+
+type GetCalendarEventCommentsRes struct {
+	CalendarEventComments []CalendarEventComment `json:"calendarEventComments"`
+}
+
+type GetCalendarEventCommentRes struct {
+	CalendarEventComment CalendarEventComment `json:"calendarEventComment"`
+}
+
+// Calendar Event Series
+type CalendarEventSeries struct {
+	Id        string `json:"id"`
+	ServerId  string `json:"serverId"`
+	ChannelId string `json:"channelId"`
+}
+
+// WARN: Post missing from documentation
+
+type PatchCalendarEventSeries struct {
+	Name             *string                  `json:"name,omitempty"`
+	Decsription      *string                  `json:"description,omitempty"`
+	Location         *string                  `json:"location,omitempty"`
+	StartsAt         *string                  `json:"startsAt,omitempty"`
+	Url              *string                  `json:"url,omitempty"`
+	Color            *int                     `json:"color,omitempty"`
+	IsAllDay         *bool                    `json:"isAllDay,omitempty"`
+	RsvpDisabled     *bool                    `json:"rsvpDisabled,omitempty"`
+	RsvpLimit        *uint                    `json:"rsvpLimit,omitempty"`
+	AutofillWaitlist *bool                    `json:"autofillWaitlist,omitempty"`
+	Duration         *uint                    `json:"duration,omitempty"`
+	IsPrivate        *bool                    `json:"isPrivate,omitempty"`
+	RoleIds          *[]int                   `json:"roleIds,omitempty"`
+	RepeatInfo       *CalendarEventRepeatInfo `json:"repeatInfo,omitempty"`
+	CalendarEventId  *uint                    `json:"calendarEventId,omitempty"`
+}
+
+type DelCalendarEventSeries struct {
+	CalendarEventId *uint `json:"calendarEventId,omitempty"`
 }
 
 // Categories
@@ -137,6 +234,10 @@ type PostCategory struct {
 type PatchCategory struct {
 	Name     *string `json:"name,omitempty"`
 	Priority *int    `json:"priority,omitempty"`
+}
+
+type GetCategoryRes struct {
+	Category Category `json:"category"`
 }
 
 // Channels
@@ -233,6 +334,10 @@ type PostDoc struct {
 
 type GetDocRes struct {
 	Doc Doc `json:"doc"`
+}
+
+type GetDocsRes struct {
+	Docs []Doc `json:"docs"`
 }
 
 type DocComment struct {
@@ -362,6 +467,21 @@ type PostGroup struct {
 	IsPublic    *bool   `json:"isPublic,omitempty"`
 }
 
+type PatchGroup struct {
+	Name        *string `json:"name,omitempty"`
+	Description *string `json:"description,omitempty"`
+	EmoteId     *int    `json:"emoteId,omitempty"`
+	IsPublic    *bool   `json:"isPublic,omitempty"`
+}
+
+type GetGroupRes struct {
+	Group Group `json:"group"`
+}
+
+type GetGroupsRes struct {
+	Groups []Group `json:"groups"`
+}
+
 // List Items
 type ListItem struct {
 	Id                 string        `json:"id"`
@@ -440,9 +560,17 @@ type Member struct {
 	IsOwner  *bool   `json:"isOwner,omitempty"`
 }
 
-type MemberSum struct {
+type MemberSummary struct {
 	User    UserSum `json:"user"`
 	RoleIds []int   `json:"roleIds"`
+}
+
+type GetMemberRes struct {
+	Member Member `json:"member"`
+}
+
+type MemberRolesRes struct {
+	RoleIds int `json:"roleIds"`
 }
 
 // Member Ban
@@ -527,8 +655,12 @@ type PostMessage struct {
 	Embeds                []ChatEmbed `json:"embeds,omitempty"`
 }
 
-type MessageRes struct {
+type GetMessageRes struct {
 	Message Message `json:"message"`
+}
+
+type GetMessagesRes struct {
+	Messages []Message `json:"messages"`
 }
 
 // Reactions
@@ -733,10 +865,7 @@ type ChatMessageCreated struct {
 	Message  Message `json:"message"`
 }
 
-type ChatMessageUpdated struct {
-	ServerId string  `json:"serverId"`
-	Message  Message `json:"message"`
-}
+type ChatMessageUpdated = ChatMessageCreated
 
 type ChatMessageDeleted struct {
 	ServerId  string         `json:"serverId"`
@@ -775,4 +904,179 @@ type UserInfo struct {
 type ServerMemberUpdated struct {
 	ServerId string   `json:"serverId"`
 	UserInfo UserInfo `json:"userInfo"`
+}
+
+type MemberRoleId struct {
+	UserId  string `json:"userId"`
+	RoleIds []int  `json:"roleIds"`
+}
+
+type ServerRolesUpdated struct {
+	ServerId      string         `json:"serverId"`
+	MemberRoleIds []MemberRoleId `json:"memberRoleIds"`
+}
+
+type ServerChannelCreated struct {
+	ServerId string  `json:"serverId"`
+	Channel  Channel `json:"channel"`
+}
+
+type ServerChannelUpdated = ServerChannelCreated
+type ServerChannelDeleted = ServerChannelUpdated
+
+type ServerMemberSocialLinkCreated struct {
+	ServerId   string     `json:"serverId"`
+	SocialLink SocialLink `json:"socialLink"`
+}
+
+type ServerMemberSocialLinkUpdated = ServerMemberSocialLinkCreated
+type ServerMemberSocialLinkDeleted = ServerMemberSocialLinkCreated
+
+type ServerWebhookCreated struct {
+	ServerId string  `json:"serverId"`
+	Webhook  Webhook `json:"webhook"`
+}
+
+type ServerWebhookUpdated = ServerWebhookCreated
+
+type DocCreated struct {
+	ServerId string `json:"serverId"`
+	Doc      Doc    `json:"doc"`
+}
+
+type DocUpdated = DocCreated
+type DocDeleted = DocUpdated
+
+type DocCommentCreated struct {
+	ServerId   string     `json:"serverId"`
+	DocComment DocComment `json:"docComment"`
+}
+
+type DocCommentUpdated = DocCommentCreated
+type DocCommentDeleted = DocCommentUpdated
+
+type CalendarEventCreated struct {
+	ServerId      string        `json:"serverId"`
+	CalendarEvent CalendarEvent `json:"calendarEvent"`
+}
+
+type CalendarEventUpdated = CalendarEventCreated
+type CalendarEventDeleted = CalendarEventUpdated
+
+type ForumTopicCreated struct {
+	ServerId   string     `json:"serverId"`
+	ForumTopic ForumTopic `json:"forumTopic"`
+}
+
+type ForumTopicUpdated = ForumTopicCreated
+type ForumTopicDeleted = ForumTopicUpdated
+type ForumTopicPinned = ForumTopicCreated
+type ForumTopicUnpinned = ForumTopicPinned
+type ForumTopicLocked = ForumTopicCreated
+type ForumTopicUnlocked = ForumTopicCreated
+
+type ForumTopicReactionCreated struct {
+	ServerId string             `json:"serverId"`
+	Reaction ForumTopicReaction `json:"reaction"`
+}
+
+type ForumTopicReactionDeleted = ForumTopicReactionCreated
+
+type ForumTopicCommentCreated struct {
+	ServerId          string            `json:"serverId"`
+	ForumTopicComment ForumTopicComment `json:"forumTopicComment"`
+}
+
+type ForumTopicCommentUpdated = ForumTopicCommentCreated
+type ForumTopicCommentDeleted = ForumTopicCommentUpdated
+
+type CalendarEventRsvpUpdated struct {
+	ServerId          string            `json:"serverId"`
+	CalendarEventRsvp CalendarEventRsvp `json:"calendarEventRsvp"`
+}
+
+type CalendarEventRsvpManyUpdated struct {
+	ServerId           string              `json:"serverId"`
+	CalendarEventRsvps []CalendarEventRsvp `json:"calendarEventRsvps"`
+}
+
+type CalendarEventRsvpDeleted = CalendarEventRsvpUpdated
+
+type ListItemCreated struct {
+	ServerId string   `json:"serverId"`
+	ListItem ListItem `json:"listItem"`
+}
+
+type ListItemUpdated = ListItemCreated
+type ListItemDeleted = ListItemUpdated
+type ListItemCompleted = ListItemCreated
+type ListItemUncompleted = ListItemCompleted
+
+type ChannelMessageReactionCreated struct {
+	ServerId string       `json:"serverId"`
+	Reaction ChatReaction `json:"chatMessageReaction"`
+}
+
+type ChannelMessageReactionDeleted struct {
+	ServerId  string       `json:"serverId"`
+	DeletedBy string       `json:"deletedBy"`
+	Reaction  ChatReaction `json:"reaction"`
+}
+
+type ChannelMessageReactionManyDeleted struct {
+	ServerId  string `json:"serverId"`
+	ChannelId string `json:"channelId"`
+	MessageId string `json:"messageId"`
+	DeletedBy string `json:"deletedBy"`
+	Count     int    `json:"count"`
+	Emote     *Emote `json:"emote,omitempty"`
+}
+
+// type ForumTopicCommentReactionCreated struct {
+//   ServerId string `json:"serverId"`
+//   Reaction ForumTopicCommentReaction `json:"reaction"`
+// }
+
+// type ForumTopicCommentReactionDeleted = ForumTopicCommentReactionCreated
+
+// type CalendarEventCommentCreated struct {
+//   ServerId string `json:"serverId"`
+//   CalendarEventComment CalendarEventComment `json:"calendarEventComment"`
+// }
+
+//type CalendarEventCommentUpdated = CalendareEventCommentCreated
+//type CalendarEventCommentDeleted = CalendareEventCommentCreated
+
+type CalendarEventReactionCreated struct {
+	ServerId string                `json:"serverId"`
+	Reaction CalendarEventReaction `json:"reaction"`
+}
+
+type CalendarEventReactionDeleted = CalendarEventReactionCreated
+
+type CalendarEventCommentReactionCreated struct {
+	ServerId string                       `json:"serverId"`
+	Reaction CalendarEventCommentReaction `json:"reaction"`
+}
+
+type CalendarEventCommentReactionDeleted = CalendarEventCommentReactionCreated
+
+type DocReactionCreated struct {
+	ServerId string      `json:"serverId"`
+	Reaction DocReaction `json:"docReaction"`
+}
+
+type DocReactionDeleted = DocReactionCreated
+
+type DocCommentReactionCreated struct {
+	ServerId string             `json:"serverId"`
+	Reaction DocCommentReaction `json:"reaction"`
+}
+
+type DocCommentReactionDeleted = DocCommentReactionCreated
+
+type CalendarEventSeriesUpdated struct {
+	ServerId            string              `json:"serverId"`
+	CalendarEventSeries CalendarEventSeries `json:"calendarEventSeries"`
+	CalendarEventId     *uint               `json:"calendareventId"`
 }
