@@ -62,18 +62,18 @@ func (a *API) get(url string) (*[]byte, error) {
 	req.Header.Add("Content-Type", "application/json")
 	req.Header.Add("Authorization", fmt.Sprintf("Bearer %v", a.Token))
 
-  res, err := http.DefaultClient.Do(req)
-  if err != nil {
-    return nil, err
-  }
+	res, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
 
-  defer res.Body.Close()
+	defer res.Body.Close()
 
-  body, err := io.ReadAll(res.Body)
+	body, err := io.ReadAll(res.Body)
 
-  if err != nil {
-    return nil, err
-  }
+	if err != nil {
+		return nil, err
+	}
 
 	return &body, nil
 }
@@ -88,14 +88,14 @@ func (a *API) del(url string) (*http.Response, error) {
 	req.Header.Add("Content-Type", "application/json")
 	req.Header.Add("Authorization", fmt.Sprintf("Bearer %v", a.Token))
 
-  res, err := http.DefaultClient.Do(req)
-  if err != nil {
-    return nil, err
-  }
+	res, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
 
-  defer res.Body.Close()
+	defer res.Body.Close()
 
-  return res, nil
+	return res, nil
 }
 
 func (a *API) req(method, url string, payload []byte) (*[]byte, error) {
@@ -107,20 +107,20 @@ func (a *API) req(method, url string, payload []byte) (*[]byte, error) {
 	req.Header.Add("Content-Type", "application/json")
 	req.Header.Add("Authorization", fmt.Sprintf("Bearer %v", a.Token))
 
-  res, err := http.DefaultClient.Do(req)
+	res, err := http.DefaultClient.Do(req)
 
-  if err != nil {
-    return nil, err
-  }
+	if err != nil {
+		return nil, err
+	}
 
-  defer res.Body.Close()
+	defer res.Body.Close()
 
-  body, err := io.ReadAll(res.Body)
-  if err != nil {
-    return nil, err
-  }
+	body, err := io.ReadAll(res.Body)
+	if err != nil {
+		return nil, err
+	}
 
-  return &body, nil
+	return &body, nil
 }
 
 // Server requests
@@ -150,87 +150,87 @@ func (a *API) CreateGroup(serverId string, newGroup PostGroup) (*GetGroupRes, er
 	}
 
 	body, err := a.req("POST", fmt.Sprintf(api(GROUPSURL), serverId), payload)
-  if err != nil {
-    return nil, err
-  }
+	if err != nil {
+		return nil, err
+	}
 
-  var group GetGroupRes
+	var group GetGroupRes
 
-  err = json.Unmarshal(*body, &group)
+	err = json.Unmarshal(*body, &group)
 
-  if err != nil {
-    return nil, err
-  }
+	if err != nil {
+		return nil, err
+	}
 
-  return &group, nil
+	return &group, nil
 }
 
 func (a *API) GetGroups(serverId string) (*GetGroupsRes, error) {
-  body, err := a.get(fmt.Sprintf(api(GROUPSURL), serverId))
-  if err != nil {
-    return nil, err
-  }
+	body, err := a.get(fmt.Sprintf(api(GROUPSURL), serverId))
+	if err != nil {
+		return nil, err
+	}
 
-  var groups GetGroupsRes
+	var groups GetGroupsRes
 
-  err = json.Unmarshal(*body, &groups)
-  if err != nil {
-    return nil, err
-  }
+	err = json.Unmarshal(*body, &groups)
+	if err != nil {
+		return nil, err
+	}
 
-  return &groups, nil
+	return &groups, nil
 }
 
 func (a *API) GetGroup(serverId, groupId string) (*GetGroupRes, error) {
-  body, err := a.get(fmt.Sprintf(api(GROUPURL), serverId, groupId))
+	body, err := a.get(fmt.Sprintf(api(GROUPURL), serverId, groupId))
 
-  if err != nil {
-    return nil, err
-  }
+	if err != nil {
+		return nil, err
+	}
 
-  var group GetGroupRes
+	var group GetGroupRes
 
-  err = json.Unmarshal(*body, &group)
-  if err != nil {
-    return nil, err
-  }
-  return &group, nil
+	err = json.Unmarshal(*body, &group)
+	if err != nil {
+		return nil, err
+	}
+	return &group, nil
 }
 
 func (a *API) UpdateGroup(serverId, groupId string, updatedGroup PatchGroup) (*GetGroupRes, error) {
-  payload, err := json.Marshal(updatedGroup)
+	payload, err := json.Marshal(updatedGroup)
 
-  if err != nil {
-    return nil, err
-  }
+	if err != nil {
+		return nil, err
+	}
 
-  body, err := a.req("PATCH", fmt.Sprintf(GROUPURL, serverId, groupId), payload)
+	body, err := a.req("PATCH", fmt.Sprintf(GROUPURL, serverId, groupId), payload)
 
-  if err != nil {
-    return nil, err
-  }
+	if err != nil {
+		return nil, err
+	}
 
-  var group GetGroupRes
+	var group GetGroupRes
 
-  err = json.Unmarshal(*body, &group)
-  if err != nil {
-    return nil, err
-  }
+	err = json.Unmarshal(*body, &group)
+	if err != nil {
+		return nil, err
+	}
 
-  return &group, nil
+	return &group, nil
 }
 
-func (a *API) DeleteGroup(serverId, groupId string) (error) {
-  res, err := a.del(fmt.Sprintf(api(GROUPURL), serverId, groupId))
-  if err != nil {
-    return err
-  }
+func (a *API) DeleteGroup(serverId, groupId string) error {
+	res, err := a.del(fmt.Sprintf(api(GROUPURL), serverId, groupId))
+	if err != nil {
+		return err
+	}
 
-  if res.StatusCode != http.StatusOK {
-    return errors.New("could not delete the group")
-  }
+	if res.StatusCode != http.StatusOK {
+		return errors.New("could not delete the group")
+	}
 
-  return nil
+	return nil
 }
 
 // So much more :sweat_emote:
