@@ -663,59 +663,6 @@ type GetMessagesRes struct {
 	Messages []Message `json:"messages"`
 }
 
-// Reactions
-// NOTE: Way too many, will update later
-type Reaction struct {
-	ChannelId string `json:"channelId"`
-	CreatedBy string `json:"createdBy"`
-	Emote     Emote  `json:"emote"`
-}
-
-type ChatReaction struct {
-	Reaction
-	MessageId string `json:"messageId"`
-}
-
-type ForumTopicReaction struct {
-	Reaction
-	ForumTopicId int `json:"forumTopicId"`
-}
-
-type ForumCommentReaction struct {
-	ForumTopicReaction
-	ForumTopicCommentId int `json:"forumTopicCommentId"`
-}
-
-type DocReaction struct {
-	Reaction
-	DocId int `json:"docId"`
-}
-
-type DocCommentReaction struct {
-	DocReaction
-	DocCommentId int `json:"docCommentId"`
-}
-
-type CalendarEventReaction struct {
-	Reaction
-	CalendarEventId int `json:"calendarEventId"`
-}
-
-type CalendarEventCommentReaction struct {
-	CalendarEventReaction
-	CalendarEventCommentId int `json:"calendarEventCommentId"`
-}
-
-type AnnouncementReaction struct {
-	Reaction
-	AnnouncementId string `json:"announcementId"`
-}
-
-type AnnouncementCommentReaction struct {
-	AnnouncementReaction
-	AnnouncementCommentId int `json:"announcementCommentId"`
-}
-
 // Roles
 type Role struct {
 	Id                    int      `json:"id"`
@@ -1080,3 +1027,294 @@ type CalendarEventSeriesUpdated struct {
 	CalendarEventSeries CalendarEventSeries `json:"calendarEventSeries"`
 	CalendarEventId     *uint               `json:"calendareventId"`
 }
+
+type CalendarEventSeriesDeleted struct {
+	ServerId            string              `json:"serverId"`
+	CalendarEventSeries CalendarEventSeries `json:"calendarEventSeries"`
+	CalendarEventId     *uint               `json:"calendarEventId"`
+}
+
+type GroupCreated struct {
+	ServerId string `json:"serverId"`
+	Group    Group  `json:"group"`
+}
+
+type GroupUpdated struct {
+	ServerId string `json:"serverId"`
+	Group    Group  `json:"group"`
+}
+
+type GroupDeleted struct {
+	ServerId string `json:"serverId"`
+	Group    Group  `json:"group"`
+}
+
+// Announcement
+
+type AnnouncementCreated struct {
+	ServerId     string       `json:"serverId"`
+	Announcement Announcement `json:"announcement"`
+}
+
+type AnnouncementUpdated struct {
+	ServerId     string       `json:"serverId"`
+	Announcement Announcement `json:"announcement"`
+}
+
+type AnnouncementDeleted struct {
+	ServerId     string       `json:"serverId"`
+	Announcement Announcement `json:"announcement"`
+}
+
+type AnnouncementReactionCreated struct {
+	ServerId string               `json:"serverId"`
+	Reaction AnnouncementReaction `json:"reaction"`
+}
+
+type AnnouncementReactionDeleted struct {
+	ServerId string               `json:"serverId"`
+	Reaction AnnouncementReaction `json:"reaction"`
+}
+
+type AnnouncementCommentCreated struct {
+	ServerId            string              `json:"serverId"`
+	AnnouncementComment AnnouncementComment `json:"annuncementComment"`
+}
+
+type AnnouncementCommentUpdated struct {
+	ServerId            string              `json:"serverId"`
+	AnnouncementComment AnnouncementComment `json:"annuncementComment"`
+}
+
+type AnnouncementCommentDeleted struct {
+	ServerId            string              `json:"serverId"`
+	AnnouncementComment AnnouncementComment `json:"annuncementComment"`
+}
+
+type AnnouncementCommentReactionCreated struct {
+	ServerId string                      `json:"serverId"`
+	Reaction AnnouncementCommentReaction `json:"reaction"`
+}
+
+type AnnouncementCommentReactionDeleted struct {
+	ServerId string                      `json:"serverId"`
+	Reaction AnnouncementCommentReaction `json:"reaction"`
+}
+
+// User status
+
+type UserStatusCreated struct {
+	ExpiresAt  *string    `json:"expiresAt,omitempty"`
+	UserId     string     `json:"userId"`
+	UserStatus UserStatus `json:"userStatus"`
+}
+
+type UserStatusDeleted struct {
+	UserId     string     `json:"userId"`
+	UserStatus UserStatus `json:"userStatus"`
+}
+
+// Roles
+type RoleCreated struct {
+	ServerId string `json:"serverId"`
+	Role     Role   `json:"role"`
+}
+
+type RoleUpdated struct {
+	ServerId string `json:"serverId"`
+	Role     Role   `json:"role"`
+}
+
+type RoleDeleted struct {
+	ServerId string `json:"serverId"`
+	Role     Role   `json:"role"`
+}
+
+type Permission map[string]bool
+
+type ChannelRolePermission struct {
+	Permissions []Permission `json:"permissions"`
+	CreatedAt   string       `json:"createdAt"`
+	UpdatedAt   *string      `json:"updatedAt,omitempty"`
+	RoleId      int          `json:"roleId"`
+	ChannelId   string       `json:"channelId"`
+}
+
+type ChannelUserPermission struct {
+	Permissions []Permission `json:"permissions"`
+	CreatedAt   string       `json:"createdAt"`
+	UpdatedAt   *string      `json:"updatedAt,omitempty"`
+	UserId      string       `json:"userId"`
+	ChannelId   string       `json:"channelId"`
+}
+
+type ChannelCategoryRolePermission struct {
+	Permissions []Permission `json:"permissions"`
+	CreatedAt   string       `json:"createdAt"`
+	UpdatedAt   *string      `json:"updatedAt,omitempty"`
+	RoleId      int          `json:"roleId"`
+	CategoryId  string       `json:"categoryId"`
+}
+
+type ChannelCategoryUserPermission struct {
+	Permissions []Permission `json:"permissions"`
+	CreatedAt   string       `json:"createdAt"`
+	UpdatedAt   *string      `json:"updatedAt,omitempty"`
+	UserId      string       `json:"userId"`
+	CategoryId  string       `json:"categoryId"`
+}
+
+// Channels
+
+type ChannelArchived struct {
+	ServerId string  `json:"string"`
+	Channel  Channel `json:"channel"`
+}
+
+type ChannelRestored struct {
+	ServerId string  `json:"string"`
+	Channel  Channel `json:"channel"`
+}
+
+// Category
+type CategoryCreated struct {
+	ServerId string   `json:"serverId"`
+	Category Category `json:"category"`
+}
+
+type CategoryUpdated struct {
+	ServerId string   `json:"serverId"`
+	Category Category `json:"category"`
+}
+
+type CategoryDeleted struct {
+	ServerId string   `json:"serverId"`
+	Category Category `json:"category"`
+}
+
+// Channel Messages
+
+type ChannelMessagePinned struct {
+	ServerId string  `json:"serverId"`
+	Message  Message `json:"message"`
+}
+
+type ChannelMessageUnpinned struct {
+	ServerId string  `json:"serverId"`
+	Message  Message `json:"message"`
+}
+
+type ChannelRolePermissionUpdated struct {
+	ServerId              string                `json:"serverId"`
+	ChannelRolePermission ChannelRolePermission `json:"channelRolePermission"`
+}
+
+type ChannelRolePermissionDeleted struct {
+	ServerId              string                `json:"serverId"`
+	ChannelRolePermission ChannelRolePermission `json:"channelRolePermission"`
+}
+
+type ChannelRolePermissionCreated struct {
+	ServerId              string                `json:"serverId"`
+	ChannelRolePermission ChannelRolePermission `json:"channelRolePermission"`
+}
+
+type ChannelUserPermissionCreated struct {
+	ServerId              string                `json:"serverId"`
+	ChannelUserPermission ChannelUserPermission `json:"channelUserPermission"`
+}
+
+type ChannelUserPermissionUpdated struct {
+	ServerId              string                `json:"serverId"`
+	ChannelUserPermission ChannelUserPermission `json:"channelUserPermission"`
+}
+
+type ChannelUserPermissionDeleted struct {
+	ServerId              string                `json:"serverId"`
+	ChannelUserPermission ChannelUserPermission `json:"channelUserPermission"`
+}
+
+type ChannelCategoryUserPermissionCreated struct {
+	ServerId                      string                        `json:"serverId"`
+	ChannelCategoryUserPermission ChannelCategoryUserPermission `json:"channelCategoryUserPermission"`
+}
+
+type ChannelCategoryUserPermissionUpdated struct {
+	ServerId                      string                        `json:"serverId"`
+	ChannelCategoryUserPermission ChannelCategoryUserPermission `json:"channelCategoryUserPermission"`
+}
+
+type ChannelCategoryUserPermissionDeleted struct {
+	ServerId                      string                        `json:"serverId"`
+	ChannelCategoryUserPermission ChannelCategoryUserPermission `json:"channelCategoryUserPermission"`
+}
+
+type ChannelCategoryRolePermissionCreated struct {
+	ServerId                      string                        `json:"serverId"`
+	ChannelCategoryRolePermission ChannelCategoryRolePermission `json:"channelCategoryRolePermission"`
+}
+
+type ChannelCategoryRolePermissionUpdated struct {
+	ServerId                      string                        `json:"serverId"`
+	ChannelCategoryRolePermission ChannelCategoryRolePermission `json:"channelCategoryRolePermission"`
+}
+
+type ChannelCategoryRolePermissionDeleted struct {
+	ServerId                      string                        `json:"serverId"`
+	ChannelCategoryRolePermission ChannelCategoryRolePermission `json:"channelCategoryRolePermission"`
+}
+
+// Reactions
+// NOTE: Way too many, will update later
+type Reaction struct {
+	ChannelId string `json:"channelId"`
+	CreatedBy string `json:"createdBy"`
+	Emote     Emote  `json:"emote"`
+}
+
+type ChatReaction struct {
+	Reaction
+	MessageId string `json:"messageId"`
+}
+
+type ForumTopicReaction struct {
+	Reaction
+	ForumTopicId int `json:"forumTopicId"`
+}
+
+type ForumCommentReaction struct {
+	ForumTopicReaction
+	ForumTopicCommentId int `json:"forumTopicCommentId"`
+}
+
+type DocReaction struct {
+	Reaction
+	DocId int `json:"docId"`
+}
+
+type DocCommentReaction struct {
+	DocReaction
+	DocCommentId int `json:"docCommentId"`
+}
+
+type CalendarEventReaction struct {
+	Reaction
+	CalendarEventId int `json:"calendarEventId"`
+}
+
+type CalendarEventCommentReaction struct {
+	CalendarEventReaction
+	CalendarEventCommentId int `json:"calendarEventCommentId"`
+}
+
+type AnnouncementReaction struct {
+	Reaction
+	AnnouncementId string `json:"announcementId"`
+}
+
+type AnnouncementCommentReaction struct {
+	AnnouncementReaction
+	AnnouncementCommentId int `json:"announcementCommentId"`
+}
+
+// TODO: Add in all the permissions
