@@ -278,6 +278,10 @@ type PatchChannel struct {
 	Visibility *string `json:"visibility,omitempty"`
 }
 
+type GetChannelRes struct {
+	Channel Channel `json:"channel"`
+}
+
 // Chat Embed
 type ChatEmbedFooter struct {
 	IconUrl *string `json:"icon_url,omitempty"`

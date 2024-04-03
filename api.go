@@ -16,6 +16,11 @@ const (
 	SERVERURL      = "servers/%v"
 	GROUPSURL      = "servers/%v/groups"
 	GROUPURL       = "servers/%v/groups/%v"
+	CHANNELSURL    = "channels/"
+	CHANNELURL     = "channels/%v"
+	CHANNELARCHIVE = "channels/%v/archive"
+	CATEGORIESURL  = "servers/%v/categories"
+	CATEGORYURL    = "servers/%v/categories/%v"
 	POSTMESSAGEURL = "channels/%v/messages"
 )
 
@@ -121,6 +126,26 @@ func (a *API) req(method, url string, payload []byte) (*[]byte, error) {
 	}
 
 	return &body, nil
+}
+
+func (a *API) emptyput(url string) (*http.Response, error) {
+	req, err := http.NewRequestWithContext(context.Background(), "PUT", url, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("Authorization", fmt.Sprintf("Bearer %v", a.Token))
+
+	res, err := http.DefaultClient.Do(req)
+
+	if err != nil {
+		return nil, err
+	}
+
+	defer res.Body.Close()
+
+	return res, nil
 }
 
 // Server requests
@@ -231,6 +256,134 @@ func (a *API) DeleteGroup(serverId, groupId string) error {
 	}
 
 	return nil
+}
+
+// Channels
+
+func (a *API) CreateChannel(newChannel PostChannel) (*GetChannelRes, error) {
+	payload, err := json.Marshal(newChannel)
+
+	if err != nil {
+		return nil, err
+	}
+
+	body, err := a.req("POST", fmt.Sprintf(api(CHANNELSURL)), payload)
+
+	if err != nil {
+		return nil, err
+	}
+
+	var serverChannel GetChannelRes
+
+	err = json.Unmarshal(*body, &body)
+	if err != nil {
+		return nil, err
+	}
+
+	return &serverChannel, nil
+}
+
+func (a *API) GetChannel(channelId string) (*GetChannelRes, error) {
+	body, err := a.get(fmt.Sprintf(api(CHANNELURL), channelId))
+
+	if err != nil {
+		return nil, err
+	}
+
+	var channel GetChannelRes
+
+	err = json.Unmarshal(*body, &channel)
+	if err != nil {
+		return nil, err
+	}
+	return &channel, nil
+}
+
+func (a *API) UpdateChannel(channelId string, updatedChannel PatchChannel) (*GetMessageRes, error) {
+	payload, err := json.Marshal(updatedChannel)
+
+	if err != nil {
+		return nil, err
+	}
+
+	body, err := a.req("PATCH", fmt.Sprintf(api(CHANNELURL), channelId), payload)
+
+	if err != nil {
+		return nil, err
+	}
+
+	var channel GetMessageRes
+
+	err = json.Unmarshal(*body, &channel)
+	if err != nil {
+		return nil, err
+	}
+
+	return &channel, nil
+}
+
+func (a *API) DeleteChannel(channelId string) error {
+	res, err := a.del(fmt.Sprintf(api(CHANNELURL), channelId))
+	if err != nil {
+		return err
+	}
+
+	if res.StatusCode != http.StatusOK {
+		return errors.New("could not delete channel")
+	}
+
+	return nil
+}
+
+func (a *API) ArchiveChannel(channelId string) error {
+	res, err := a.emptyput(fmt.Sprintf(api(CHANNELARCHIVE), channelId))
+	if err != nil {
+		return err
+	}
+
+	if res.StatusCode != http.StatusOK {
+		return errors.New("could not archive channel")
+	}
+
+	return nil
+}
+
+func (a *API) UnarchiveChannel(channelId string) error {
+	res, err := a.del(fmt.Sprintf(api(CHANNELARCHIVE), channelId))
+	if err != nil {
+		return err
+	}
+
+	if res.StatusCode != http.StatusOK {
+		return errors.New("could not unarchive channel")
+	}
+
+	return nil
+}
+
+// Categories
+
+func (a *API) CreateCategory(serverId string, newCategory PostCategory) (*GetCategoryRes, error) {
+	payload, err := json.Marshal(newCategory)
+
+  if err != nil {
+    return nil, err
+  }
+
+  body, err := a.req("POST", fmt.Sprintf(api(CATEGORIESURL), serverId), payload)
+  if err != nil {
+    return nil, err
+  }
+
+  var category GetCategoryRes
+
+  err = json.Unmarshal(*body, &category)
+
+  if err != nil {
+    return nil, err
+  }
+
+  return &category, nil
 }
 
 // So much more :sweat_emote:
