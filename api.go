@@ -13,15 +13,24 @@ import (
 var APIURL = "https://guilded.gg/api/v1/"
 
 const (
-	SERVERURL      = "servers/%v"
-	GROUPSURL      = "servers/%v/groups"
-	GROUPURL       = "servers/%v/groups/%v"
-	CHANNELSURL    = "channels/"
-	CHANNELURL     = "channels/%v"
-	CHANNELARCHIVE = "channels/%v/archive"
-	CATEGORIESURL  = "servers/%v/categories"
-	CATEGORYURL    = "servers/%v/categories/%v"
-	POSTMESSAGEURL = "channels/%v/messages"
+	SERVERURL          = "servers/%v"
+	GROUPSURL          = "servers/%v/groups"
+	GROUPURL           = "servers/%v/groups/%v"
+	CHANNELSURL        = "channels/"
+	CHANNELURL         = "channels/%v"
+	CHANNELARCHIVE     = "channels/%v/archive"
+	CATEGORIESURL      = "servers/%v/categories"
+	CATEGORYURL        = "servers/%v/categories/%v"
+	MESSAGESURL        = "channels/%v/messages"
+	MESSAGEURL         = "channels/%v/messages/%v"
+	MESSAGEPINURL      = "channels/%v/messages/%v/pin"
+	MEMBERSNICKNAMEURL = "servers/%v/members/%/nickname"
+	MEMBERSURL         = "servers/%v/members"
+	MEMBERURL          = "servers/%v/members/%v"
+	GROUPMEMBERURL     = "groups/%v/members/%v"
+	ROLEMEMBERURL      = "servers/%v/members/%v/roles/%v"
+	MEMBERBANSURL      = "servers/%v/bans"
+	MEMBERBANURL       = "servers/%v/bans/%v"
 )
 
 type API struct {
@@ -30,31 +39,6 @@ type API struct {
 
 func api(url string) string {
 	return APIURL + url
-}
-
-func (a *API) oldget(url string) (*http.Request, error) {
-	req, err := http.NewRequestWithContext(context.Background(), "GET", url, nil)
-
-	if err != nil {
-		return nil, err
-	}
-
-	req.Header.Add("Content-Type", "application/json")
-	req.Header.Add("Authorization", fmt.Sprintf("Bearer %v", a.Token))
-
-	return req, nil
-}
-
-func (a *API) oldreq(method, url string, payload io.Reader) (*http.Request, error) {
-	req, err := http.NewRequestWithContext(context.Background(), method, url, payload)
-	if err != nil {
-		return nil, err
-	}
-
-	req.Header.Add("Content-Type", "application/json")
-	req.Header.Add("Authorization", fmt.Sprintf("Bearer %v", a.Token))
-
-	return req, nil
 }
 
 func (a *API) get(url string) (*[]byte, error) {
@@ -128,8 +112,8 @@ func (a *API) req(method, url string, payload []byte) (*[]byte, error) {
 	return &body, nil
 }
 
-func (a *API) emptyput(url string) (*http.Response, error) {
-	req, err := http.NewRequestWithContext(context.Background(), "PUT", url, nil)
+func (a *API) emptyUpdate(method, url string) (*http.Response, error) {
+	req, err := http.NewRequestWithContext(context.Background(), method, url, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -267,7 +251,7 @@ func (a *API) CreateChannel(newChannel PostChannel) (*GetChannelRes, error) {
 		return nil, err
 	}
 
-	body, err := a.req("POST", fmt.Sprintf(api(CHANNELSURL)), payload)
+	body, err := a.req("POST", api(CHANNELSURL), payload)
 
 	if err != nil {
 		return nil, err
@@ -336,7 +320,7 @@ func (a *API) DeleteChannel(channelId string) error {
 }
 
 func (a *API) ArchiveChannel(channelId string) error {
-	res, err := a.emptyput(fmt.Sprintf(api(CHANNELARCHIVE), channelId))
+	res, err := a.emptyUpdate("PUT", fmt.Sprintf(api(CHANNELARCHIVE), channelId))
 	if err != nil {
 		return err
 	}
@@ -366,28 +350,81 @@ func (a *API) UnarchiveChannel(channelId string) error {
 func (a *API) CreateCategory(serverId string, newCategory PostCategory) (*GetCategoryRes, error) {
 	payload, err := json.Marshal(newCategory)
 
-  if err != nil {
-    return nil, err
-  }
+	if err != nil {
+		return nil, err
+	}
 
-  body, err := a.req("POST", fmt.Sprintf(api(CATEGORIESURL), serverId), payload)
-  if err != nil {
-    return nil, err
-  }
+	body, err := a.req("POST", fmt.Sprintf(api(CATEGORIESURL), serverId), payload)
+	if err != nil {
+		return nil, err
+	}
 
-  var category GetCategoryRes
+	var category GetCategoryRes
 
-  err = json.Unmarshal(*body, &category)
+	err = json.Unmarshal(*body, &category)
 
-  if err != nil {
-    return nil, err
-  }
+	if err != nil {
+		return nil, err
+	}
 
-  return &category, nil
+	return &category, nil
 }
 
-// So much more :sweat_emote:
-func (a *API) SendMessage(chanID string, msg PostMessage) (*GetMessageRes, error) {
+func (a *API) GetCategory(serverId, categoryId string) (*GetCategoryRes, error) {
+	body, err := a.get(fmt.Sprintf(api(CATEGORYURL), serverId, categoryId))
+
+	if err != nil {
+		return nil, err
+	}
+
+	var category GetCategoryRes
+
+	err = json.Unmarshal(*body, &category)
+	if err != nil {
+		return nil, err
+	}
+
+	return &category, nil
+}
+
+func (a *API) UpdateCategory(serverId, categoryId string, updateCategory PatchCategory) (*GetCategoryRes, error) {
+	payload, err := json.Marshal(updateCategory)
+	if err != nil {
+		return nil, err
+	}
+
+	body, err := a.req("PATCH", fmt.Sprintf(api(CATEGORYURL), serverId, categoryId), payload)
+	if err != nil {
+		return nil, err
+	}
+
+	var category GetCategoryRes
+
+	err = json.Unmarshal(*body, &category)
+	if err != nil {
+		return nil, err
+	}
+
+	return &category, nil
+}
+
+func (a *API) DeleteCategory(serverId, categoryId string) error {
+	res, err := a.del(fmt.Sprintf(api(CATEGORYURL), serverId, categoryId))
+
+	if err != nil {
+		return err
+	}
+
+	if res.StatusCode != http.StatusOK {
+		return errors.New("error deleting category")
+	}
+
+	return nil
+}
+
+// Messages
+
+func (a *API) SendMessage(chanId string, msg PostMessage) (*GetMessageRes, error) {
 
 	payload, err := json.Marshal(msg)
 
@@ -395,7 +432,7 @@ func (a *API) SendMessage(chanID string, msg PostMessage) (*GetMessageRes, error
 		return nil, err
 	}
 
-	body, err := a.req("POST", fmt.Sprintf(api(POSTMESSAGEURL), chanID), payload)
+	body, err := a.req("POST", fmt.Sprintf(api(MESSAGESURL), chanId), payload)
 
 	if err != nil {
 		return nil, err
@@ -410,3 +447,303 @@ func (a *API) SendMessage(chanID string, msg PostMessage) (*GetMessageRes, error
 
 	return &newMsg, nil
 }
+
+func (a *API) GetMessages(chanId string) (*GetMessagesRes, error) {
+	body, err := a.get(fmt.Sprintf(api(MESSAGESURL), chanId))
+
+	if err != nil {
+		return nil, err
+	}
+
+	var messages GetMessagesRes
+
+	err = json.Unmarshal(*body, &messages)
+	if err != nil {
+		return nil, err
+	}
+
+	return &messages, err
+}
+
+func (a *API) GetMessage(chanId, msgId string) (*GetMessageRes, error) {
+	body, err := a.get(fmt.Sprintf(api(MESSAGEURL), chanId, msgId))
+
+	if err != nil {
+		return nil, err
+	}
+
+	var message GetMessageRes
+
+	err = json.Unmarshal(*body, &message)
+	if err != nil {
+		return nil, err
+	}
+
+	return &message, nil
+}
+
+func (a *API) UpdateMessage(chanId, msgId string, updateMsg PatchMessage) (*GetMessageRes, error) {
+	payload, err := json.Marshal(updateMsg)
+	if err != nil {
+		return nil, err
+	}
+
+	body, err := a.req("PUT", fmt.Sprintf(api(MESSAGEURL), chanId, msgId), payload)
+	if err != nil {
+		return nil, err
+	}
+
+	var message GetMessageRes
+
+	err = json.Unmarshal(*body, &message)
+	if err != nil {
+		return nil, err
+	}
+
+	return &message, nil
+}
+
+func (a *API) DeleteMessage(chanId, msgId string) error {
+	res, err := a.del(fmt.Sprintf(MESSAGEURL, chanId, msgId))
+	if err != nil {
+		return err
+	}
+
+	if res.StatusCode != http.StatusOK {
+		return errors.New("error deleting message")
+	}
+
+	return nil
+}
+
+func (a *API) PinMessage(chanId, msgId string) error {
+	res, err := a.emptyUpdate("POST", fmt.Sprintf(api(MESSAGEPINURL), chanId, msgId))
+	if err != nil {
+		return err
+	}
+
+	if res.StatusCode != http.StatusOK {
+		return errors.New("could not pin message")
+	}
+
+	return nil
+}
+
+func (a *API) UnpinMessage(chanId, msgId string) error {
+	res, err := a.del(fmt.Sprintf(api(MESSAGEPINURL), chanId, msgId))
+	if err != nil {
+		return err
+	}
+
+	if res.StatusCode != http.StatusOK {
+		return errors.New("could not unpin message")
+	}
+
+	return nil
+}
+
+// Members
+
+func (a *API) UpdateMemberNickname(serverId, userId string, nickname PutMemberNickname) (*PutMemberNickname, error) {
+	payload, err := json.Marshal(nickname)
+	if err != nil {
+		return nil, err
+	}
+
+	body, err := a.req("PUT", fmt.Sprintf(api(MEMBERSNICKNAMEURL), serverId, userId), payload)
+	if err != nil {
+		return nil, err
+	}
+
+	var nicknameRes PutMemberNickname
+
+	err = json.Unmarshal(*body, &nicknameRes)
+	if err != nil {
+		return nil, err
+	}
+
+	return &nicknameRes, nil
+}
+
+func (a *API) DeleteMemberNickname(serverId, userId string) error {
+	res, err := a.del(fmt.Sprintf(api(MEMBERSNICKNAMEURL), serverId, userId))
+	if err != nil {
+		return err
+	}
+
+	if res.StatusCode != http.StatusOK {
+		return errors.New("could not reset nickname")
+	}
+
+	return nil
+}
+
+func (a *API) GetMembers(serverId string) (*GetMembersRes, error) {
+	body, err := a.get(fmt.Sprintf(api(MEMBERSURL), serverId))
+	if err != nil {
+		return nil, err
+	}
+
+	var members GetMembersRes
+
+	err = json.Unmarshal(*body, &members)
+	if err != nil {
+		return nil, err
+	}
+
+	return &members, nil
+}
+
+func (a *API) GetMember(serverId, userId string) (*GetMemberRes, error) {
+	body, err := a.get(fmt.Sprintf(api(MEMBERURL), serverId, userId))
+	if err != nil {
+		return nil, err
+	}
+
+	var member GetMemberRes
+	err = json.Unmarshal(*body, &member)
+	if err != nil {
+		return nil, err
+	}
+
+	return &member, nil
+}
+
+func (a *API) KickMember(serverId, userId string) error {
+	res, err := a.del(fmt.Sprintf(api(MEMBERURL), serverId, userId))
+	if err != nil {
+		return err
+	}
+
+	if res.StatusCode != http.StatusOK {
+		return errors.New("could not kick member")
+	}
+
+	return nil
+}
+
+// Groups
+func (a *API) AddMemberToGroup(groupId, userId string) error {
+	res, err := a.emptyUpdate("PUT", fmt.Sprintf(api(GROUPMEMBERURL), groupId, userId))
+
+	if err != nil {
+		return err
+	}
+
+	if res.StatusCode != http.StatusOK {
+		return errors.New("could not add member to group")
+	}
+
+	return nil
+}
+
+func (a *API) RemoveMemberFromGroup(groupId, userId string) error {
+	res, err := a.del(fmt.Sprintf(api(GROUPMEMBERURL), groupId, userId))
+	if err != nil {
+		return err
+	}
+
+	if res.StatusCode != http.StatusOK {
+		return errors.New("could not remove member from group")
+	}
+
+	return nil
+}
+
+// Roles
+func (a *API) AddRoleToMember(serverId, userId, roleId string) error {
+	res, err := a.emptyUpdate("PUT", fmt.Sprintf(api(ROLEMEMBERURL), serverId, userId, roleId))
+	if err != nil {
+		return err
+	}
+
+	if res.StatusCode != http.StatusOK {
+		return errors.New("could not add role to member")
+	}
+
+	return nil
+}
+
+func (a *API) RemoveRoleFromMember(serverId, userId, roleId string) error {
+	res, err := a.del(fmt.Sprintf(api(ROLEMEMBERURL), serverId, userId, roleId))
+	if err != nil {
+		return err
+	}
+
+	if res.StatusCode != http.StatusOK {
+		return errors.New("could not remove role from member")
+	}
+
+	return nil
+}
+
+// Ban Members
+
+func (a *API) BanMember(serverId, userId, reason *string) (*MemberBanRes, error) {
+	payload, err := json.Marshal(PostMemberBan{Reason: reason})
+	if err != nil {
+		return nil, err
+	}
+
+	body, err := a.req("POST", fmt.Sprintf(api(MEMBERBANURL), serverId, userId), payload)
+	if err != nil {
+		return nil, err
+	}
+
+	var memberBan MemberBanRes
+
+	err = json.Unmarshal(*body, &memberBan)
+	if err != nil {
+		return nil, err
+	}
+
+	return &memberBan, nil
+}
+
+func (a *API) GetMemberBan(serverId, userId string) (*MemberBanRes, error) {
+	body, err := a.get(fmt.Sprintf(api(MEMBERBANURL), serverId, userId))
+	if err != nil {
+		return nil, err
+	}
+
+	var bannedMember MemberBanRes
+
+	err = json.Unmarshal(*body, &bannedMember)
+	if err != nil {
+		return nil, err
+	}
+
+	return &bannedMember, nil
+}
+
+func (a *API) GetMemberBans(serverId string) (*MemberBansRes, error) {
+	body, err := a.get(fmt.Sprintf(api(MEMBERBANSURL), serverId))
+  if err != nil {
+    return nil, err
+  }
+
+  var memberBans MemberBansRes
+
+  err = json.Unmarshal(*body, &memberBans)
+
+  if err != nil {
+    return nil, err
+  }
+
+  return &memberBans, nil
+}
+
+func (a *API) RemoveMemberBan(serverId, userId string) error {
+	res, err := a.del(fmt.Sprintf(api(MEMBERBANURL), serverId, userId))
+	if err != nil {
+		return err
+	}
+
+	if res.StatusCode != http.StatusOK {
+		return errors.New("could not remove member ban")
+	}
+
+	return nil
+}
+
+// So much more :sweat_emote:

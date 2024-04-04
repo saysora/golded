@@ -573,8 +573,17 @@ type GetMemberRes struct {
 	Member Member `json:"member"`
 }
 
+type GetMembersRes struct {
+	Members []Member `json:"members"`
+}
+
 type MemberRolesRes struct {
 	RoleIds int `json:"roleIds"`
+}
+
+// Member nickname
+type PutMemberNickname struct {
+	Nickname string `json:"nickname"`
 }
 
 // Member Ban
@@ -587,6 +596,14 @@ type MemberBan struct {
 
 type PostMemberBan struct {
 	Reason *string `json:"reason,omitempty"`
+}
+
+type MemberBanRes struct {
+	ServerMemberBan MemberBan `json:"serverMemberBan"`
+}
+
+type MemberBansRes struct {
+	ServerMemberBans []MemberBan `json:"serverMemberBans"`
 }
 
 // Mentions
@@ -658,6 +675,8 @@ type PostMessage struct {
 	HiddenLinkPreviewUrls []string    `json:"hiddenLinkPreviewUrls,omitempty"`
 	Embeds                []ChatEmbed `json:"embeds,omitempty"`
 }
+
+type PatchMessage = PostMessage
 
 type GetMessageRes struct {
 	Message Message `json:"message"`
