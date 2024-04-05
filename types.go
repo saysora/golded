@@ -99,6 +99,23 @@ type CalendarEvent struct {
 	Cancellation     *CalendarEventCancellation `json:"cancellation,omitempty"`
 }
 
+type PostCalendarEvent struct {
+	Name             string                   `json:"name"`
+	Description      *string                  `json:"description,omitempty"`
+	Location         *string                  `json:"location,omitempty"`
+	StartsAt         *string                  `json:"startsAt,omitempty"`
+	Url              *string                  `json:"url,omitempty"`
+	Color            *int                     `json:"color,omitempty"`
+	IsAllDay         *bool                    `json:"isAllDay,omitempty"`
+	RsvpDisabled     *bool                    `json:"rsvpDisabled,omitempty"`
+	RsvpLimit        *uint                    `json:"rsvpLimit,omitempty"`
+	AutofillWaitlist *bool                    `json:"autofillWaitlist,omitempty"`
+	Duration         *uint                    `json:"duration,omitempty"`
+	IsPrivate        *bool                    `json:"isPrivate,omitempty"`
+	RoleIds          *[]int                   `json:"roleIds,omitempty"`
+	RepeatInfo       *CalendarEventRepeatInfo `json:"repeatInfo,omitempty"`
+}
+
 type CalendarEventCancellation struct {
 	Description *string `json:"description,omitempty"`
 	CreatedBy   string  `json:"createdBy"`

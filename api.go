@@ -13,24 +13,30 @@ import (
 var APIURL = "https://guilded.gg/api/v1/"
 
 const (
-	SERVERURL          = "servers/%v"
-	GROUPSURL          = "servers/%v/groups"
-	GROUPURL           = "servers/%v/groups/%v"
-	CHANNELSURL        = "channels/"
-	CHANNELURL         = "channels/%v"
-	CHANNELARCHIVE     = "channels/%v/archive"
-	CATEGORIESURL      = "servers/%v/categories"
-	CATEGORYURL        = "servers/%v/categories/%v"
-	MESSAGESURL        = "channels/%v/messages"
-	MESSAGEURL         = "channels/%v/messages/%v"
-	MESSAGEPINURL      = "channels/%v/messages/%v/pin"
-	MEMBERSNICKNAMEURL = "servers/%v/members/%/nickname"
-	MEMBERSURL         = "servers/%v/members"
-	MEMBERURL          = "servers/%v/members/%v"
-	GROUPMEMBERURL     = "groups/%v/members/%v"
-	ROLEMEMBERURL      = "servers/%v/members/%v/roles/%v"
-	MEMBERBANSURL      = "servers/%v/bans"
-	MEMBERBANURL       = "servers/%v/bans/%v"
+	SERVERURL               = "servers/%v"
+	GROUPSURL               = "servers/%v/groups"
+	GROUPURL                = "servers/%v/groups/%v"
+	CHANNELSURL             = "channels/"
+	CHANNELURL              = "channels/%v"
+	CHANNELARCHIVE          = "channels/%v/archive"
+	CATEGORIESURL           = "servers/%v/categories"
+	CATEGORYURL             = "servers/%v/categories/%v"
+	MESSAGESURL             = "channels/%v/messages"
+	MESSAGEURL              = "channels/%v/messages/%v"
+	MESSAGEPINURL           = "channels/%v/messages/%v/pin"
+	MEMBERSNICKNAMEURL      = "servers/%v/members/%/nickname"
+	MEMBERSURL              = "servers/%v/members"
+	MEMBERURL               = "servers/%v/members/%v"
+	GROUPMEMBERURL          = "groups/%v/members/%v"
+	ROLEMEMBERURL           = "servers/%v/members/%v/roles/%v"
+	MEMBERBANSURL           = "servers/%v/bans"
+	MEMBERBANURL            = "servers/%v/bans/%v"
+	ANNOUNCEMENTSURL        = "channels/%v/announcements"
+	ANNOUNCEMENTURL         = "channels/%v/announcements/%v"
+	ANNOUNCEMENTCOMMENTSURL = "channels/%v/announcements/%/comments"
+	ANNOUNCEMENTCOMMENTURL  = "channels/%v/announcements/%/comments/%v"
+	CALENDAREVENTSURL       = "channels/%v/events"
+	CALENDAREVENTURL        = "channels/%v/events/%v"
 )
 
 type API struct {
@@ -718,19 +724,19 @@ func (a *API) GetMemberBan(serverId, userId string) (*MemberBanRes, error) {
 
 func (a *API) GetMemberBans(serverId string) (*MemberBansRes, error) {
 	body, err := a.get(fmt.Sprintf(api(MEMBERBANSURL), serverId))
-  if err != nil {
-    return nil, err
-  }
+	if err != nil {
+		return nil, err
+	}
 
-  var memberBans MemberBansRes
+	var memberBans MemberBansRes
 
-  err = json.Unmarshal(*body, &memberBans)
+	err = json.Unmarshal(*body, &memberBans)
 
-  if err != nil {
-    return nil, err
-  }
+	if err != nil {
+		return nil, err
+	}
 
-  return &memberBans, nil
+	return &memberBans, nil
 }
 
 func (a *API) RemoveMemberBan(serverId, userId string) error {
@@ -744,6 +750,243 @@ func (a *API) RemoveMemberBan(serverId, userId string) error {
 	}
 
 	return nil
+}
+
+// Announcements
+
+func (a *API) CreateAnnouncement(channelId string, newAnnouncement PostAnnouncement) (*GetAnnouncementRes, error) {
+	payload, err := json.Marshal(newAnnouncement)
+
+	if err != nil {
+		return nil, err
+	}
+
+	body, err := a.req("POST", fmt.Sprintf(api(ANNOUNCEMENTSURL), channelId), payload)
+	if err != nil {
+		return nil, err
+	}
+
+	var announcement GetAnnouncementRes
+
+	err = json.Unmarshal(*body, &announcement)
+	if err != nil {
+		return nil, err
+	}
+
+	return &announcement, nil
+
+}
+
+func (a *API) GetAnnouncements(channelId string) (*GetAnnouncementsRes, error) {
+	body, err := a.get(fmt.Sprintf(api(ANNOUNCEMENTSURL), channelId))
+	if err != nil {
+		return nil, err
+	}
+
+	var announcements GetAnnouncementsRes
+
+	err = json.Unmarshal(*body, &announcements)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &announcements, nil
+}
+
+func (a *API) GetAnnouncement(channelId, announcementId string) (*GetAnnouncementRes, error) {
+	body, err := a.get(fmt.Sprintf(api(ANNOUNCEMENTURL), channelId, announcementId))
+	if err != nil {
+		return nil, err
+	}
+
+	var announcement GetAnnouncementRes
+
+	err = json.Unmarshal(*body, &announcement)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &announcement, nil
+}
+
+func (a *API) UpdateAnnouncement(channelId, announcementId string, updateAnnouncement PatchAnnouncement) (*GetAnnouncementRes, error) {
+	payload, err := json.Marshal(updateAnnouncement)
+	if err != nil {
+		return nil, err
+	}
+
+	body, err := a.req("PATCH", fmt.Sprintf(api(ANNOUNCEMENTURL), channelId, announcementId), payload)
+	if err != nil {
+		return nil, err
+	}
+
+	var announcement GetAnnouncementRes
+
+	err = json.Unmarshal(*body, &announcement)
+	if err != nil {
+		return nil, err
+	}
+
+	return &announcement, nil
+}
+
+func (a *API) DeleteAnnouncement(channelId string) error {
+	res, err := a.del(fmt.Sprintf(api(ANNOUNCEMENTURL), channelId))
+	if err != nil {
+		return err
+	}
+
+	if res.StatusCode != http.StatusOK {
+		return errors.New("could not delete announcement")
+	}
+
+	return nil
+}
+
+func (a *API) CreateAnnouncementComment(channelId, announcementId string, newComment PostAnnouncementComment) (*GetAnnouncementComment, error) {
+	payload, err := json.Marshal(newComment)
+	if err != nil {
+		return nil, err
+	}
+
+	body, err := a.req("POST", fmt.Sprintf(api(ANNOUNCEMENTCOMMENTSURL), channelId, announcementId), payload)
+
+	if err != nil {
+		return nil, err
+	}
+
+	var announcementComment GetAnnouncementComment
+
+	err = json.Unmarshal(*body, &announcementComment)
+	if err != nil {
+		return nil, err
+	}
+
+	return &announcementComment, nil
+}
+
+func (a *API) GetAnnouncementComments(channelId, announcementId string) (*GetAnnouncementComments, error) {
+	body, err := a.get(fmt.Sprintf(api(ANNOUNCEMENTCOMMENTSURL), channelId, announcementId))
+	if err != nil {
+		return nil, err
+	}
+
+	var comment GetAnnouncementComments
+
+	err = json.Unmarshal(*body, &comment)
+	if err != nil {
+		return nil, err
+	}
+
+	return &comment, nil
+}
+
+func (a *API) GetAnnouncementComment(channelId, announcementId, commentId string) (*GetAnnouncementComments, error) {
+	body, err := a.get(fmt.Sprintf(api(ANNOUNCEMENTCOMMENTURL), channelId, announcementId, commentId))
+	if err != nil {
+		return nil, err
+	}
+
+	var comments GetAnnouncementComments
+
+	err = json.Unmarshal(*body, &comments)
+	if err != nil {
+		return nil, err
+	}
+
+	return &comments, nil
+}
+
+func (a *API) UpdateAnnouncementComment(channelId, announcementId, commentId string, newComment PostAnnouncementComment) (*GetAnnouncementComment, error) {
+	payload, err := json.Marshal(newComment)
+	if err != nil {
+		return nil, err
+	}
+
+	body, err := a.req("PATCH", fmt.Sprintf(api(ANNOUNCEMENTCOMMENTURL), channelId, announcementId, commentId), payload)
+	if err != nil {
+		return nil, err
+	}
+
+	var comment GetAnnouncementComment
+
+	err = json.Unmarshal(*body, &comment)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &comment, err
+}
+
+func (a *API) DeleteAnnouncementComment(channelId, announcementId, commentId string) error {
+	res, err := a.del(fmt.Sprintf(api(ANNOUNCEMENTCOMMENTURL), channelId, announcementId, commentId))
+	if err != nil {
+		return err
+	}
+
+	if res.StatusCode != http.StatusOK {
+		return errors.New("could not delete comment")
+	}
+
+	return nil
+}
+
+// Events
+func (a *API) CreateEvent(channelId string, newEvent PostCalendarEvent) (*GetCalendarEventRes, error) {
+	payload, err := json.Marshal(newEvent)
+	if err != nil {
+		return nil, err
+	}
+
+	body, err := a.req("POST", fmt.Sprintf(api(CALENDAREVENTSURL), channelId), payload)
+
+  if err != nil {
+    return nil, err
+  }
+
+  var event GetCalendarEventRes
+
+  err = json.Unmarshal(*body, &event)
+  if err != nil {
+    return nil, err
+  }
+
+  return &event, nil
+}
+
+func (a *API) GetEvents(channelId string) (*GetCalendarEventsRes, error) {
+  body, err := a.get(fmt.Sprintf(api(CALENDAREVENTSURL), channelId))
+  if err != nil {
+    return nil, err
+  }
+
+  var events GetCalendarEventsRes
+
+  err = json.Unmarshal(*body, &events)
+  if err != nil {
+    return nil, err
+  }
+
+  return &events, nil
+}
+
+func (a *API) GetEvent(channelId, eventId string) (*GetCalendarEventRes, error) {
+  body, err := a.get(fmt.Sprintf(api(CALENDAREVENTURL), channelId, eventId))
+  if err != nil {
+    return nil, err
+  }
+
+  var event GetCalendarEventRes
+
+  err = json.Unmarshal(*body, &event)
+  if err != nil {
+    return nil, err
+  }
+
+  return &event, nil
 }
 
 // So much more :sweat_emote:
