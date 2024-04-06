@@ -10,7 +10,7 @@ import (
 	"net/http"
 )
 
-var APIURL = "https://guilded.gg/api/v1/"
+var APIURL = "https://www.guilded.gg/api/v1/"
 
 const (
 	SERVERURL               = "servers/%v"

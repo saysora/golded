@@ -685,12 +685,12 @@ type DeletedMessage struct {
 }
 
 type PostMessage struct {
-	IsPrivate             bool        `json:"isPrivate,omitempty"`
-	IsSilent              bool        `json:"isSilent,omitempty"`
-	ReplyMessageIds       []string    `json:"replyMessageIds,omitempty"`
+	IsPrivate             *bool        `json:"isPrivate,omitempty"`
+	IsSilent              *bool        `json:"isSilent,omitempty"`
+	ReplyMessageIds       *[]string    `json:"replyMessageIds,omitempty"`
 	Content               string      `json:"content,omitempty"`
-	HiddenLinkPreviewUrls []string    `json:"hiddenLinkPreviewUrls,omitempty"`
-	Embeds                []ChatEmbed `json:"embeds,omitempty"`
+	HiddenLinkPreviewUrls *[]string    `json:"hiddenLinkPreviewUrls,omitempty"`
+	Embeds                *[]ChatEmbed `json:"embeds,omitempty"`
 }
 
 type PatchMessage = PostMessage
