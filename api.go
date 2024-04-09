@@ -37,6 +37,11 @@ const (
 	ANNOUNCEMENTCOMMENTURL  = "channels/%v/announcements/%/comments/%v"
 	CALENDAREVENTSURL       = "channels/%v/events"
 	CALENDAREVENTURL        = "channels/%v/events/%v"
+	EVENTRSVPSURL           = "channels/%v/events/%v/rsvps"
+	EVENTRSVPURL            = "channels/%v/events/%v/rsvps/%v"
+	EVENTCOMMENTSURL        = "channels/%v/events/%v/comments"
+	EVENTCOMMENTURL         = "channels/%v/events/%v/comments/%v"
+	EVENTSERIESURL          = "channels/%v/event_series/%"
 )
 
 type API struct {
@@ -943,50 +948,280 @@ func (a *API) CreateEvent(channelId string, newEvent PostCalendarEvent) (*GetCal
 
 	body, err := a.req("POST", fmt.Sprintf(api(CALENDAREVENTSURL), channelId), payload)
 
-  if err != nil {
-    return nil, err
-  }
+	if err != nil {
+		return nil, err
+	}
 
-  var event GetCalendarEventRes
+	var event GetCalendarEventRes
 
-  err = json.Unmarshal(*body, &event)
-  if err != nil {
-    return nil, err
-  }
+	err = json.Unmarshal(*body, &event)
+	if err != nil {
+		return nil, err
+	}
 
-  return &event, nil
+	return &event, nil
 }
 
 func (a *API) GetEvents(channelId string) (*GetCalendarEventsRes, error) {
-  body, err := a.get(fmt.Sprintf(api(CALENDAREVENTSURL), channelId))
-  if err != nil {
-    return nil, err
-  }
+	body, err := a.get(fmt.Sprintf(api(CALENDAREVENTSURL), channelId))
+	if err != nil {
+		return nil, err
+	}
 
-  var events GetCalendarEventsRes
+	var events GetCalendarEventsRes
 
-  err = json.Unmarshal(*body, &events)
-  if err != nil {
-    return nil, err
-  }
+	err = json.Unmarshal(*body, &events)
+	if err != nil {
+		return nil, err
+	}
 
-  return &events, nil
+	return &events, nil
 }
 
 func (a *API) GetEvent(channelId, eventId string) (*GetCalendarEventRes, error) {
-  body, err := a.get(fmt.Sprintf(api(CALENDAREVENTURL), channelId, eventId))
+	body, err := a.get(fmt.Sprintf(api(CALENDAREVENTURL), channelId, eventId))
+	if err != nil {
+		return nil, err
+	}
+
+	var event GetCalendarEventRes
+
+	err = json.Unmarshal(*body, &event)
+	if err != nil {
+		return nil, err
+	}
+
+	return &event, nil
+}
+
+func (a *API) UpdateEvent(channelId, eventId string, updateEvent PatchCalendarEvent) (*GetCalendarEventRes, error) {
+	payload, err := json.Marshal(updateEvent)
+
+	if err != nil {
+		return nil, err
+	}
+
+	body, err := a.req("PATCH", fmt.Sprintf(api(CALENDAREVENTURL), channelId, eventId), payload)
+
+	if err != nil {
+		return nil, err
+	}
+
+	var event GetCalendarEventRes
+
+	err = json.Unmarshal(*body, &event)
+	if err != nil {
+		return nil, err
+	}
+
+	return &event, nil
+}
+
+func (a *API) DeleteEvent(channelId, eventId string) error {
+	res, err := a.del(fmt.Sprintf(api(CALENDAREVENTURL), channelId, eventId))
+	if err != nil {
+		return err
+	}
+
+	if res.StatusCode != http.StatusOK {
+		return errors.New("could not delete event")
+	}
+
+	return nil
+}
+
+func (a *API) GetUserRSVP(channelId, eventId, userId string) (*GetCalendarEventRsvpRes, error) {
+	body, err := a.get(fmt.Sprintf(api(EVENTRSVPURL), channelId, eventId, userId))
+	if err != nil {
+		return nil, err
+	}
+
+	var rsvp GetCalendarEventRsvpRes
+
+	err = json.Unmarshal(*body, &rsvp)
+	if err != nil {
+		return nil, err
+	}
+
+	return &rsvp, nil
+}
+
+func (a *API) CreateUpdateRSVP(channelId, eventId, userId string, rsvp PatchCalendarEventRsvp) (*GetCalendarEventRsvpRes, error) {
+	payload, err := json.Marshal(rsvp)
+	if err != nil {
+		return nil, err
+	}
+
+	body, err := a.req("PUT", fmt.Sprintf(api(EVENTRSVPURL), channelId, eventId, userId), payload)
+	if err != nil {
+		return nil, err
+	}
+
+	var resRSVP GetCalendarEventRsvpRes
+
+	err = json.Unmarshal(*body, &resRSVP)
+	if err != nil {
+		return nil, err
+	}
+
+	return &resRSVP, nil
+}
+
+func (a *API) DeleteRSVP(channelId, eventId, userId string) error {
+	res, err := a.del(fmt.Sprintf(api(EVENTRSVPURL), channelId, eventId, userId))
+	if err != nil {
+		return err
+	}
+
+	if res.StatusCode != http.StatusOK {
+		return errors.New("could not delete rsvp")
+	}
+
+	return nil
+}
+
+func (a *API) GetRSVPS(channelId, eventId string) (*GetCalendarEventRsvpsRes, error) {
+	body, err := a.get(fmt.Sprintf(api(EVENTRSVPSURL), channelId, eventId))
+	if err != nil {
+		return nil, err
+	}
+
+	var rsvps GetCalendarEventRsvpsRes
+
+	err = json.Unmarshal(*body, &rsvps)
+	if err != nil {
+		return nil, err
+	}
+
+	return &rsvps, nil
+}
+
+func (a *API) CreateUpdateRSVPS(channelId, eventId string, rsvps PatchCalendarEventRsvps) error {
+	payload, err := json.Marshal(rsvps)
+	if err != nil {
+		return err
+	}
+
+	_, err = a.req("PUT", fmt.Sprintf(api(EVENTRSVPSURL), channelId, eventId), payload)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (a *API) CreateEventComment(channelId, eventId string, newComment PostCalendarEventComment) (*GetCalendarEventCommentRes, error) {
+	payload, err := json.Marshal(newComment)
+	if err != nil {
+		return nil, err
+	}
+
+	body, err := a.req("POST", fmt.Sprintf(api(EVENTCOMMENTSURL), channelId, eventId), payload)
+	if err != nil {
+		return nil, err
+	}
+
+	var comment GetCalendarEventCommentRes
+
+	err = json.Unmarshal(*body, &comment)
+	if err != nil {
+		return nil, err
+	}
+
+	return &comment, nil
+}
+
+func (a *API) GetEventComments(channelId, eventId string) (*GetCalendarEventCommentsRes, error) {
+	body, err := a.get(fmt.Sprintf(api(EVENTCOMMENTSURL), channelId, eventId))
+	if err != nil {
+		return nil, err
+	}
+
+	var comments GetCalendarEventCommentsRes
+
+	err = json.Unmarshal(*body, &comments)
+	if err != nil {
+		return nil, err
+	}
+
+	return &comments, nil
+}
+
+func (a *API) GetEventComment(channelId, eventId, commentId string) (*GetCalendarEventCommentRes, error) {
+	body, err := a.get(fmt.Sprintf(api(EVENTCOMMENTURL), channelId, eventId, commentId))
+	if err != nil {
+		return nil, err
+	}
+
+	var comment GetCalendarEventCommentRes
+
+	err = json.Unmarshal(*body, &comment)
+	if err != nil {
+		return nil, err
+	}
+
+	return &comment, nil
+}
+
+func (a *API) UpdateEventComment(channelId, eventId, commentId string, updatedComment PostCalendarEventComment) (*GetCalendarEventCommentRes, error) {
+	payload, err := json.Marshal(updatedComment)
+	if err != nil {
+		return nil, err
+	}
+
+	body, err := a.req("PATCH", fmt.Sprintf(api(EVENTCOMMENTURL), channelId, eventId, commentId), payload)
+	if err != nil {
+		return nil, err
+	}
+
+	var comment GetCalendarEventCommentRes
+
+	err = json.Unmarshal(*body, &comment)
+	if err != nil {
+		return nil, err
+	}
+
+	return &comment, nil
+}
+
+func (a *API) DeleteEventComment(channelId, eventId, commentId string) error {
+	res, err := a.del(fmt.Sprintf(api(EVENTCOMMENTURL), channelId, eventId, commentId))
+	if err != nil {
+		return err
+	}
+
+	if res.StatusCode != http.StatusOK {
+		return errors.New("could not delete comment")
+	}
+
+	return nil
+}
+
+func (a *API) UpdateEventSeries(channelId, seriesId string, seriesUpdate PatchCalendarEventSeries) error {
+  payload, err := json.Marshal(seriesUpdate)
   if err != nil {
-    return nil, err
+    return err
   }
 
-  var event GetCalendarEventRes
-
-  err = json.Unmarshal(*body, &event)
+  _, err = a.req("PATCH", fmt.Sprintf(api(EVENTSERIESURL), channelId, seriesId), payload)
   if err != nil {
-    return nil, err
+    return err
   }
 
-  return &event, nil
+  return nil
+}
+
+func (a *API) DeleteEventSeries(channelId, seriesId string) error {
+  res, err := a.del(fmt.Sprintf(api(EVENTSERIESURL), channelId, seriesId))
+  if err != nil {
+    return err
+  }
+
+  if res.StatusCode != http.StatusOK {
+    return errors.New("could not delete series")
+  }
+
+  return nil
 }
 
 // So much more :sweat_emote:

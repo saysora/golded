@@ -174,11 +174,20 @@ type GetCalendarEventsRes struct {
 	CalendarEvents []CalendarEvent `json:"calendarEvents"`
 }
 
+type PatchCalendarEventRsvp struct {
+	Status string `json:"status"`
+}
+
+type PatchCalendarEventRsvps struct {
+	UserIds []string `json:"userIds"`
+	Status  string   `json:"status"`
+}
+
 type GetCalendarEventRsvpRes struct {
 	CalendarEventRsvp CalendarEventRsvp `json:"calendarEventRsvp"`
 }
 
-type GetCalendareventRsvpsRes struct {
+type GetCalendarEventRsvpsRes struct {
 	CalendarEventRsvps []CalendarEventRsvp `json:"calendarEventRsvps"`
 }
 
@@ -191,6 +200,10 @@ type CalendarEventComment struct {
 	CalendarEventId uint      `json:"calendarEventId"`
 	ChannelId       string    `json:"channelId"`
 	Mentions        *Mentions `json:"mentions,omitempty"`
+}
+
+type PostCalendarEventComment struct {
+	Content string `json:"content"`
 }
 
 type GetCalendarEventCommentsRes struct {
@@ -688,7 +701,7 @@ type PostMessage struct {
 	IsPrivate             *bool        `json:"isPrivate,omitempty"`
 	IsSilent              *bool        `json:"isSilent,omitempty"`
 	ReplyMessageIds       *[]string    `json:"replyMessageIds,omitempty"`
-	Content               string      `json:"content,omitempty"`
+	Content               string       `json:"content,omitempty"`
 	HiddenLinkPreviewUrls *[]string    `json:"hiddenLinkPreviewUrls,omitempty"`
 	Embeds                *[]ChatEmbed `json:"embeds,omitempty"`
 }
